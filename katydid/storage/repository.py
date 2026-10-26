@@ -4,10 +4,10 @@ from datetime import datetime
 
 from abc import ABC, abstractmethod
 
-from calliope.model.library import Library
-from calliope.model.collection import Collection
-from calliope.model.tag import Tag
-from calliope.model.entry import Entry
+from katydid.model.library import Library
+from katydid.model.collection import Collection
+from katydid.model.tag import Tag
+from katydid.model.entry import Entry
 
 class Repository(ABC):
     @abstractmethod
@@ -150,8 +150,6 @@ class MarkdownFolderRepository(Repository):
             
         return library
             
-
-
     def save_library(self, library: Library):
         raise NotImplementedError
 

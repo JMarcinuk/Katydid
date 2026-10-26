@@ -1,15 +1,15 @@
 import uuid
 
-from calliope.model.entry import Entry
-from calliope.model.tag import Tag
+from katydid.model.entry import Entry
+from katydid.model.tag import Tag
 
-from calliope.model.errors import DuplicateContentError
-from calliope.model.errors import TagInUseError
-from calliope.model.errors import DefaultTagError
-from calliope.model.errors import EntryValidationError
-from calliope.model.errors import CharLimitConflictError
+from katydid.model.errors import DuplicateContentError
+from katydid.model.errors import TagInUseError
+from katydid.model.errors import DefaultTagError
+from katydid.model.errors import EntryValidationError
+from katydid.model.errors import CharLimitConflictError
 
-from calliope.model.query import *
+from katydid.model.query import *
 
 class Collection:
     def __init__(self, title, description, default_tags, id=None, char_limit=None, 

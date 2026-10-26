@@ -1,10 +1,10 @@
-from calliope.model.tag import Tag
-from calliope.model.collection import Collection
+from katydid.model.tag import Tag
+from katydid.model.collection import Collection
 
-from calliope.model.query import CollectionQuery
-from calliope.model.query import TagMode
+from katydid.model.query import CollectionQuery
+from katydid.model.query import TagMode
 
-from calliope.model.errors import DuplicateContentError
+from katydid.model.errors import DuplicateContentError
 
 class Library:
     def __init__(self, default_entry_tags=None, collection_tags=None):
