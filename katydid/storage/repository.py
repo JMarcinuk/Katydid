@@ -178,7 +178,14 @@ class MarkdownFolderRepository(Repository):
         return library
             
     def save_library(self, library: Library):
-        raise NotImplementedError
+        library_dict = {
+            "format_version": FORMAT_VERSION,
+            "collection_tags": [self._tag_to_dict(tag) for tag in library.collection_tags.values()]
+        }
+
+        path = self._root_path / "library.json"
+        json_text = json.dumps(library_dict, indent=2, ensure_ascii=False)
+        self._safe_write(path, json_text)
 
     def save_collection(self, collection: Collection):
         self._write_collection(collection)
