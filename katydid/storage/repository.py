@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 from datetime import datetime
+import time
 
 from abc import ABC, abstractmethod
 
@@ -8,6 +9,8 @@ from katydid.model.library import Library
 from katydid.model.collection import Collection
 from katydid.model.tag import Tag
 from katydid.model.entry import Entry
+
+FORMAT_VERSION = 1
 
 class Repository(ABC):
     @abstractmethod
@@ -55,9 +58,9 @@ class MarkdownFolderRepository(Repository):
 
     def _write_entry(self, folder: str, entry: Entry):
         entries_path = self._root_path / "collections" / folder / "entries"
-        entries_path.mkdir(parents=True, exist_ok=True)
 
         metadata = {
+            "format_version": FORMAT_VERSION,
             "id": entry.id,
             "title": entry.title,
             "tag_ids": sorted(entry.tag_ids),
@@ -69,10 +72,7 @@ class MarkdownFolderRepository(Repository):
         filetext = (divider, json.dumps(metadata, indent=2, ensure_ascii=False), divider, entry.body)
 
         new_entry = entries_path / f"{entry.id}.md"
-        tmp_file = new_entry.with_suffix(".tmp")
-
-        tmp_file.write_text("\n".join(filetext), encoding="utf-8")
-        tmp_file.replace(new_entry)
+        self._safe_write(new_entry, "\n".join(filetext))
 
     @staticmethod
     def _tag_to_dict(tag: Tag) -> dict:
@@ -82,6 +82,18 @@ class MarkdownFolderRepository(Repository):
             "color": tag.color
         }
         return tag_dict
+
+    @staticmethod
+    def _safe_write(path: Path, text: str):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        
+        temp_file = path.with_suffix(".tmp")
+        temp_file.write_text(text, encoding="utf-8")
+        try:
+            temp_file.replace(path)
+        except PermissionError:
+            time.sleep(0.2) # catch OneDrive hiccups, try again
+            temp_file.replace(path)
 
     @staticmethod
     def _dict_to_tag(data: dict) -> Tag:
@@ -114,7 +126,22 @@ class MarkdownFolderRepository(Repository):
             "tag_ids": info["tag_ids"]
         }
         return collection_dict
-            
+
+    def _write_collection(self, collection: Collection):
+        path = self._root_path / "collections" / collection.id / "collection.json"
+
+        collection_dict = {
+            "format_version": FORMAT_VERSION,
+            "id": collection.id,
+            "title": collection.title,
+            "description": collection.description,
+            "char_limit": collection.char_limit,
+            "tag_ids": sorted(collection.tag_ids),
+            "custom_tags": [self._tag_to_dict(tag) for tag in collection.custom_tags.values()]
+        }
+
+        json_text = json.dumps(collection_dict, indent=2, ensure_ascii=False)
+        self._safe_write(path, json_text)
 
     def load_library(self) -> Library:
         tags_json_file = Path(__file__).parent.parent / "resources" / "default_tags.json"
@@ -154,13 +181,13 @@ class MarkdownFolderRepository(Repository):
         raise NotImplementedError
 
     def save_collection(self, collection: Collection):
-        raise NotImplementedError
+        self._write_collection(collection)
 
     def delete_collection(self, collection_id: str):
         raise NotImplementedError
 
     def save_entry(self, collection: Collection, entry: Entry):
-        raise NotImplementedError
+        self._write_entry(collection.id, entry)
 
     def delete_entry(self, collection: Collection, entry_id: str):
         raise NotImplementedError
