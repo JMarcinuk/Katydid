@@ -45,19 +45,21 @@ class Repository(ABC):
 
 class MarkdownFolderRepository(Repository):
     def __init__(self, root_path: Path):
-        self._root_path = root_path
+        self._root_path = Path(root_path)
 
     def _read_entry(self, file: Path) -> Entry:
         raw_file = file.read_text(encoding="utf-8")
         file_list = raw_file.split("---\n", maxsplit=2)
         metadata = json.loads(file_list[1])
+        if metadata.get("format_version", 1) > FORMAT_VERSION:
+            raise ValueError("Metadata format is the wrong version")
         body = file_list[2]
 
         return Entry(title=metadata["title"], id=metadata["id"], created=datetime.fromisoformat(metadata["created"]), 
                      modified=datetime.fromisoformat(metadata["modified"]), body=body, tag_ids=metadata["tag_ids"])
 
-    def _write_entry(self, folder: str, entry: Entry):
-        entries_path = self._root_path / "collections" / folder / "entries"
+    def _write_entry(self, collection_id: str, entry: Entry):
+        entries_path = self._root_path / "collections" / collection_id / "entries"
 
         metadata = {
             "format_version": FORMAT_VERSION,
@@ -107,6 +109,8 @@ class MarkdownFolderRepository(Repository):
         if not collection_metadata.is_file():
             return None
         info = json.loads(collection_metadata.read_text(encoding="utf-8"))
+        if info.get("format_version", 1) > FORMAT_VERSION:
+            raise ValueError("Metadata format is the wrong version")
         entries = []
         entries_dir = folder / "entries"
         if entries_dir.is_dir():
@@ -143,6 +147,11 @@ class MarkdownFolderRepository(Repository):
         json_text = json.dumps(collection_dict, indent=2, ensure_ascii=False)
         self._safe_write(path, json_text)
 
+    @staticmethod
+    def _check_id(item_id: str):
+        if not item_id or Path(item_id).name != item_id or item_id in (".", ".."):
+            raise ValueError(f"Unsafe ID for a file path: {item_id!r}")
+
     def load_library(self) -> Library:
         tags_json_file = Path(__file__).parent.parent / "resources" / "default_tags.json"
         tags_list_json = json.loads(tags_json_file.read_text(encoding="utf-8"))
@@ -152,24 +161,29 @@ class MarkdownFolderRepository(Repository):
 
         metadata_path = self._root_path / "library.json"
         if metadata_path.is_file():
-            try: 
-                metafile = metadata_path.read_text(encoding="utf-8")
-                metadata = json.loads(metafile)
-                tags = [self._dict_to_tag(d) for d in metadata["collection_tags"]]
-                library = Library(default_entry_tags=default_tags_list, collection_tags=tags)
-            except (json.JSONDecodeError, KeyError) as err:
+            try:
+                metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as err:
                 raise ValueError(f"Library metadata is damaged and could not be loaded: {err}") from err
+
+            if metadata.get("format_version", 1) > FORMAT_VERSION:
+                raise ValueError("This library was created by a newer version of Katydid. Please update the app.")
+
+            try:
+                tags = [self._dict_to_tag(d) for d in metadata["collection_tags"]]
+            except (KeyError, ValueError) as err:
+                raise ValueError(f"Library metadata is damaged and could not be loaded: {err}") from err
+            library = Library(default_entry_tags=default_tags_list, collection_tags=tags)
         else:
             library = Library(default_entry_tags=default_tags_list)
         
-
         collections_dir = self._root_path / "collections"
         if not collections_dir.is_dir():
             return library # this is a first-time load, return an empty library
         for folder in collections_dir.iterdir():
             try:
                 collection_dict = self._read_collection(folder)
-            except (json.JSONDecodeError, KeyError):
+            except (json.JSONDecodeError, KeyError, ValueError):
                 continue
             if collection_dict is None:
                 continue
@@ -191,10 +205,21 @@ class MarkdownFolderRepository(Repository):
         self._write_collection(collection)
 
     def delete_collection(self, collection_id: str):
-        raise NotImplementedError
+        self._check_id(collection_id)
+        folder = self._root_path / "collections" / collection_id
+        if not folder.is_dir():
+            return
+
+        trash = self._root_path / ".trash"
+        trash.mkdir(parents=True, exist_ok=True)
+
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        folder.replace(trash / f"{collection_id}_{stamp}")
 
     def save_entry(self, collection: Collection, entry: Entry):
         self._write_entry(collection.id, entry)
 
     def delete_entry(self, collection: Collection, entry_id: str):
-        raise NotImplementedError
+        self._check_id(entry_id)
+        entry_file = self._root_path / "collections" / collection.id / "entries" / f"{entry_id}.md"
+        entry_file.unlink(missing_ok=True)
