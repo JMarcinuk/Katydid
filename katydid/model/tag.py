@@ -30,6 +30,8 @@ class Tag:
 
     @staticmethod
     def validate_color(color):
+        if not isinstance(color, str):
+            raise TypeError("Tag color must be a string")
         if not all(c in string.hexdigits for c in color[1:]) or len(color) != 7 or color[0] != "#":
             raise ValueError("Color string incorrect format")
 
