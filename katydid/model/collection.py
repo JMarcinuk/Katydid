@@ -258,3 +258,6 @@ class Collection:
         if self._title_taken(entry.title, ignore_id=entry.id):
             problems.append(f"An Entry titled {entry.title} already exists.")
         return problems
+
+    def __repr__(self):
+        return f"Collection(id='{self.id}', title='{self.title}', char-limit='{self.char_limit}', num-entries:'{len(self._entries)}'"
