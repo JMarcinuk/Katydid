@@ -1,0 +1,140 @@
+/* Katydid stylesheet template
+   Every placeholder (in curly brackets) is filled from the active theme in themes.json.
+   Placeholder names must match the theme's keys exactly. */
+
+
+/* ---------- Base ---------- */
+
+QWidget {
+    background: {background};
+    color: {text};
+    font-size: 13px;
+}
+
+QLabel#Muted {
+    color: {text-muted};
+}
+
+QLabel#Error {
+    color: {error};
+}
+
+
+/* ---------- Panels ---------- */
+
+/* the left column: sidebar.setObjectName("Sidebar") */
+#Sidebar {
+    background: {surface};
+    border-right: 1px solid {border};
+}
+
+
+/* ---------- Buttons ---------- */
+
+/* primary: the main action on a screen (New Collection, Save) */
+QPushButton {
+    background: {primary-back};
+    color: {primary-fore};
+    border: 1px solid {border};
+    border-radius: 6px;
+    padding: 6px 14px;
+}
+
+QPushButton:hover {
+    border-color: {selection};
+}
+
+QPushButton:pressed {
+    background: {selection};
+}
+
+QPushButton:disabled {
+    background: {surface};
+    color: {text-muted};
+    border-color: {surface};
+}
+
+/* secondary: everything else, button.setProperty("role", "secondary") */
+QPushButton[role="secondary"] {
+    background: {secondary-back};
+    color: {secondary-fore};
+}
+
+/* toggles, such as the view-mode buttons: button.setCheckable(True) */
+QPushButton:checked {
+    background: {selection};
+    border-color: {border};
+}
+
+
+/* ---------- Text input ---------- */
+
+QLineEdit {
+    background: {surface};
+    color: {text};
+    border: 1px solid {surface};
+    border-radius: 6px;
+    padding: 6px 8px;
+    selection-background-color: {selection};
+}
+
+QLineEdit:focus {
+    border-color: {border};
+}
+
+/* the writing area: editor.setObjectName("Editor") */
+QTextEdit#Editor {
+    background: {paper};
+    color: {ink};
+    border: none;
+    padding: 24px;
+    font-size: 15px;
+}
+
+
+/* ---------- Lists and tabs ---------- */
+QListView {
+    background: {background};
+    border: none;
+    outline: none;
+}
+
+QTabBar::tab {
+    background: {surface};
+    color: {text-muted};
+    padding: 6px 14px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background: {background};
+    color: {text};
+    border-bottom: 2px solid {border};
+}
+
+
+/* ---------- Small things ---------- */
+QToolTip {
+    background: {surface};
+    color: {text};
+    border: 1px solid {border};
+    padding: 4px 6px;
+}
+
+QScrollBar:vertical {
+    background: {background};
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: {surface};
+    border-radius: 5px;
+    min-height: 24px;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0;
+}
