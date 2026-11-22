@@ -1,5 +1,4 @@
 import pytest
-import string
 import datetime
 
 from katydid.model.collection import Collection
