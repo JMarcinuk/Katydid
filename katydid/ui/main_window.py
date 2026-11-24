@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import QWidget, QMainWindow, QStackedWidget, QLabel
 from PySide6.QtCore import Qt
 
+from katydid.ui.library_view import LibraryView
+
 from katydid.model.library import Library
 from katydid.storage.repository import MarkdownFolderRepository
 
@@ -18,8 +20,7 @@ class MainWindow(QMainWindow):
         self._stack = QStackedWidget()
         self.setCentralWidget(self._stack)
 
-        self._library_view = QLabel("Library placeholder")
-        self._library_view.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._library_view = LibraryView(self._library, self._repo)
         self._stack.addWidget(self._library_view)
 
     def show_library(self):

@@ -70,7 +70,7 @@ QPushButton:checked {
 /* ---------- Text input ---------- */
 
 QLineEdit {
-    background: {surface};
+    background: {background};
     color: {text};
     border: 1px solid {surface};
     border-radius: 6px;
@@ -137,4 +137,35 @@ QScrollBar::handle:vertical {
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
+}
+
+#TopBar {
+    background: {surface};
+    border-bottom: 1px solid {border};
+}
+
+/* labels inside panels show the panel color, not the floor color */
+#TopBar QLabel,
+#Sidebar QLabel {
+    background: transparent;
+}
+
+QLabel#ScreenTitle {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+QLabel#Logo {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+#SlidePanel {
+    background: {surface};
+    border-left: 1px solid {border};
+}
+
+#SlidePanel QLabel,
+#SlidePanel QCheckBox {
+    background: transparent;
 }
