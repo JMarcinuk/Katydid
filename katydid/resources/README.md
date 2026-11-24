@@ -7,8 +7,8 @@ This file describes the list of default tags for the program. Default tag ids ar
 Contains color codes for app themes. The themes contain the following parameters:
    * id - a unique string id for the theme
    * title - the title displayed to the user in the preferences menu
-   * background - overall background window color
-   * surface - background color of primary UI elements
+   * background - background color of primary UI elements
+   * surface - overall background window color
    * text - UI text color
    * text-muted - Muted text color for timestamps and other secondary data
    * border - Border color for UI elements in the app
